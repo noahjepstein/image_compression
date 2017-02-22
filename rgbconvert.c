@@ -1,13 +1,12 @@
 /* Filename:         rgbconvert.c
- * Authors:          Noah Epstein (nepste01), Katie Kurtz (kkurtz01)
- * Last Modified:    Mar 1st, 2014
+ * Last Modified:    Mar 1st, 2015
  *
  * Acknowledgements: See README.txt
  *
- * Description:      RGBConvert is a submodule of 40image that converts all 
+ * Description:      RGBConvert is a submodule of 40image that converts all
  *                   Pnm_rgb pixels stored in a Uarray2b to component video
- *                   pixels. It also converts a Uarray2b of component video 
- *                   pixels to Pnm_rgb pixels. 
+ *                   pixels. It also converts a Uarray2b of component video
+ *                   pixels to Pnm_rgb pixels.
  */
 
 
@@ -25,7 +24,7 @@
 const unsigned RGB_DENOM = 255;
 const int BLOCKSIZE = 2;
 
-void apply_rgb_to_cv_pix(int i, int j, UArray2b_T array, void *pixel, 
+void apply_rgb_to_cv_pix(int i, int j, UArray2b_T array, void *pixel,
                                                                     void *cl);
 void apply_cv_to_rgb_pix(int i, int j, UArray2b_T array, void *pixel,
                                                                     void *cl);
@@ -35,24 +34,24 @@ void clip_rgb(struct Pnm_rgb *pix);
 
 
 /* Description: Converts a PPM pixmap w/ RGB pixels to UArray2b of component
- *              video pixels. 
- *              
- * Input:       PPM pixmap - the original image to be compressed. 
- * Output:      UArray2b of component-video structs. One tier down. 
+ *              video pixels.
+ *
+ * Input:       PPM pixmap - the original image to be compressed.
+ * Output:      UArray2b of component-video structs. One tier down.
  */
 UArray2b_T rgb_to_comp_vid(Pnm_ppm pixmap)
 {
         Pnm_ppm cv_pixmap = malloc(sizeof(*cv_pixmap));
         cv_pixmap->denominator = pixmap->denominator;
 
-        cv_pixmap->pixels = UArray2b_new(pixmap->width, pixmap->height, 
+        cv_pixmap->pixels = UArray2b_new(pixmap->width, pixmap->height,
                                           sizeof(struct comp_vid), BLOCKSIZE);
-        
+
         UArray2b_map(pixmap->pixels, &apply_rgb_to_cv_pix, cv_pixmap);
 
         UArray2b_T pixels = cv_pixmap->pixels;
         free(cv_pixmap);
-        
+
         return pixels;
 }
 
@@ -70,10 +69,10 @@ Pnm_ppm comp_vid_to_rgb(UArray2b_T b_img)
 }
 
 
-/* Description: Makes a new pixmap out of an RGB array 
- *              
- * Input:       PPM pixmap - the original image to be compressed. 
- * Output:      UArray2b of component-video structs. One tier down. 
+/* Description: Makes a new pixmap out of an RGB array
+ *
+ * Input:       PPM pixmap - the original image to be compressed.
+ * Output:      UArray2b of component-video structs. One tier down.
  */
 Pnm_ppm ppm_from_u2b(UArray2b_T rgb_array)
 {
@@ -89,14 +88,14 @@ Pnm_ppm ppm_from_u2b(UArray2b_T rgb_array)
 
 
 /* Description: Apply function that, when mapped to a Uarray2b of RGB pixels,
- *              turns each RGB pixel into a component-video pixel. 
- *              
+ *              turns each RGB pixel into a component-video pixel.
+ *
  * Input:       Takes i and j indices of the pixel, pointer to the RGB pixel
  *              itself, new target array passed as closure where we'll place
- *              comp_vid structs. 
+ *              comp_vid structs.
  * Output:      UArray2b of component-video struct as closure.
  */
-void apply_rgb_to_cv_pix(int i, int j, UArray2b_T array, void *pixel, 
+void apply_rgb_to_cv_pix(int i, int j, UArray2b_T array, void *pixel,
                                                                      void *cl)
 {
         assert(pixel != NULL);
@@ -109,11 +108,11 @@ void apply_rgb_to_cv_pix(int i, int j, UArray2b_T array, void *pixel,
         assert(cvpixel != NULL);
 
         /* many calculation for rgb to component video */
-        cvpixel->lum = (0.299 * rgbpix.red) + (0.587 * rgbpix.green)  
+        cvpixel->lum = (0.299 * rgbpix.red) + (0.587 * rgbpix.green)
                                                       + (0.114 * rgbpix.blue);
-        cvpixel->pb = -(0.168736 * rgbpix.red) - (0.331264 * rgbpix.green) 
+        cvpixel->pb = -(0.168736 * rgbpix.red) - (0.331264 * rgbpix.green)
                                                         + (0.5 * rgbpix.blue);
-        cvpixel->pr = (0.5 * rgbpix.red) - (0.418688 * rgbpix.green) 
+        cvpixel->pr = (0.5 * rgbpix.red) - (0.418688 * rgbpix.green)
                                                    - (0.081312 * rgbpix.blue);
 
         //ambiguate denominator so we can assume 255 on decompression
@@ -125,14 +124,14 @@ void apply_rgb_to_cv_pix(int i, int j, UArray2b_T array, void *pixel,
 
 
 /* Description: Apply function that, when mapped to a Uarray2b of component
- *              video pixels, turns each cv pixel into an RGB pixel. 
- *              
+ *              video pixels, turns each cv pixel into an RGB pixel.
+ *
  * Input:       Takes i and j indices of the pixel, pointer to the CV pixel
  *              itself, new target array passed as closure where we'll place
- *              RGB structs. 
+ *              RGB structs.
  * Output:      UArray2b of RGB structs as closure.
  */
-void apply_cv_to_rgb_pix(int i, int j, UArray2b_T array, void *pixel, 
+void apply_cv_to_rgb_pix(int i, int j, UArray2b_T array, void *pixel,
                                                                      void *cl)
 {
         (void)array;
@@ -144,12 +143,12 @@ void apply_cv_to_rgb_pix(int i, int j, UArray2b_T array, void *pixel,
 
         cvpix->lum = cvpix->lum * RGB_DENOM;
         cvpix->pb = cvpix->pb * RGB_DENOM;
-        cvpix->pr = cvpix->pr * RGB_DENOM;      
-        
+        cvpix->pr = cvpix->pr * RGB_DENOM;
+
         /* many calculations to go from component video to rgb */
         struct Pnm_rgb *elem = UArray2b_at(rgb_array, i, j);
         signed r = (1.0 * cvpix->lum) + (1.402 * cvpix->pr);
-        signed g = (1.0 * cvpix->lum) - (0.344136 * cvpix->pb) 
+        signed g = (1.0 * cvpix->lum) - (0.344136 * cvpix->pb)
                                                      - (0.714136 * cvpix->pr);
         signed b = (1.0 * cvpix->lum) + (1.772 * cvpix->pb);
 
@@ -171,8 +170,8 @@ void apply_cv_to_rgb_pix(int i, int j, UArray2b_T array, void *pixel,
 
 
 /* Description: Limits values of a pixel to values between 0 and RGB_DENOM
- *              (255). 
- *              
+ *              (255).
+ *
  * Input:       RGB pixel pointer.
  * Output:      Nothing.
  */
@@ -191,6 +190,3 @@ void clip_rgb(struct Pnm_rgb *pix)
                 pix->blue = RGB_DENOM;
         }
 }
-
-
-

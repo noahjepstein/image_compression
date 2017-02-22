@@ -1,15 +1,14 @@
 /* Filename:         bitpack.c
- * Authors:          Noah Epstein (nepste01), Katie Kurtz (kkurtz01)
- * Last Modified:    Mar 1st, 2014
+ * Last Modified:    Mar 1st, 2015
  *
  * Acknowledgements: See README.txt
  *
- * Description:      Bitpack is a module with functions for bitpacking and 
+ * Description:      Bitpack is a module with functions for bitpacking and
  *                   manipulating bit fields of signed and unsigned int values
- *                   within the uint64_t type. It features functions for 
+ *                   within the uint64_t type. It features functions for
  *                   checking whether ints and unsigneds fit within numbers of
  *                   bits, for pulling values of bitfields, and for inserting
- *                   values into bitfields. 
+ *                   values into bitfields.
  */
 
 
@@ -32,11 +31,11 @@ static inline uint64_t ushift_l(uint64_t val, unsigned n);
 static inline uint64_t ushift_r(uint64_t val, unsigned n);
 
 
-/* Description: Checks if an unsigned value n fits within a bitfield of size 
+/* Description: Checks if an unsigned value n fits within a bitfield of size
  *              width.
- *              
+ *
  * Input:       n, a value to check; width, the size of a bitfield.
- * Output:      True if it fits. 
+ * Output:      True if it fits.
  */
 bool Bitpack_fitsu(uint64_t n, unsigned width)
 {
@@ -46,11 +45,11 @@ bool Bitpack_fitsu(uint64_t n, unsigned width)
 }
 
 
-/* Description: Checks if a signed value n fits within a bitfield of size 
+/* Description: Checks if a signed value n fits within a bitfield of size
  *              width.
- *              
+ *
  * Input:       n, a value to check; width, the size of a bitfield.
- * Output:      True if it fits. 
+ * Output:      True if it fits.
  */
 bool Bitpack_fitss( int64_t n, unsigned width)
 {
@@ -61,12 +60,12 @@ bool Bitpack_fitss( int64_t n, unsigned width)
 }
 
 
-/* Description: Retrieves an unsigned value from a bitfield starting at 
+/* Description: Retrieves an unsigned value from a bitfield starting at
  *              least-significant-bit lsb, of size width, contained in word.
- *              
- * Input:       word, the container; width, the size of a bitfield. lsb, the 
- *              location of the bitfield. 
- * Output:      True if it fits. 
+ *
+ * Input:       word, the container; width, the size of a bitfield. lsb, the
+ *              location of the bitfield.
+ * Output:      True if it fits.
  */
 uint64_t Bitpack_getu(uint64_t word, unsigned width, unsigned lsb)
 {
@@ -89,14 +88,14 @@ uint64_t Bitpack_getu(uint64_t word, unsigned width, unsigned lsb)
 }
 
 
-/* Description: Puts an unsigned value into a bitfield in word starting at 
+/* Description: Puts an unsigned value into a bitfield in word starting at
  *              least-significant-bit lsb, of size width.
- *              
- * Input:       word, the container; width, the size of a bitfield. lsb, the 
- *              location of the bitfield, value, the value to store. 
- * Output:      The new word that contains the stored value. 
+ *
+ * Input:       word, the container; width, the size of a bitfield. lsb, the
+ *              location of the bitfield, value, the value to store.
+ * Output:      The new word that contains the stored value.
  */
-uint64_t Bitpack_newu(uint64_t word, unsigned width, unsigned lsb, 
+uint64_t Bitpack_newu(uint64_t word, unsigned width, unsigned lsb,
                                                                uint64_t value)
 {
         assert(Bitpack_fitsu(value, width));
@@ -120,12 +119,12 @@ uint64_t Bitpack_newu(uint64_t word, unsigned width, unsigned lsb,
 }
 
 
-/* Description: Retrieves a signed value from a bitfield starting at 
+/* Description: Retrieves a signed value from a bitfield starting at
  *              least-significant-bit lsb, of size width, contained in word.
- *              
- * Input:       word, the container; width, the size of a bitfield. lsb, the 
- *              location of the bitfield. 
- * Output:      True if it fits. 
+ *
+ * Input:       word, the container; width, the size of a bitfield. lsb, the
+ *              location of the bitfield.
+ * Output:      True if it fits.
  */
 int64_t Bitpack_gets(uint64_t word, unsigned width, unsigned lsb)
 {
@@ -148,14 +147,14 @@ int64_t Bitpack_gets(uint64_t word, unsigned width, unsigned lsb)
 }
 
 
-/* Description: Puts a signed value into a bitfield in word starting at 
+/* Description: Puts a signed value into a bitfield in word starting at
  *              least-significant-bit lsb, of size width.
- *              
- * Input:       word, the container; width, the size of a bitfield. lsb, the 
- *              location of the bitfield, value, the value to store. 
- * Output:      The new word that contains the stored value. 
+ *
+ * Input:       word, the container; width, the size of a bitfield. lsb, the
+ *              location of the bitfield, value, the value to store.
+ * Output:      The new word that contains the stored value.
  */
-uint64_t Bitpack_news(uint64_t word, unsigned width, unsigned lsb, 
+uint64_t Bitpack_news(uint64_t word, unsigned width, unsigned lsb,
                                                                 int64_t value)
 {
 

@@ -1,10 +1,9 @@
 /* Filename:         rgbconvert.h
- * Authors:          Noah Epstein (nepste01), Katie Kurtz (kkurtz01)
- * Last Modified:    Mar 1st, 2014
+ * Last Modified:    Mar 1st, 2015
  *
  * Acknowledgements: See README.txt
  *
- * Description:      Header file for RGBCONVERT module. 
+ * Description:      Header file for RGBCONVERT module.
  */
 
 #ifndef RGBCONVERT

@@ -1,15 +1,14 @@
 /* Filename:         packpix.c
- * Authors:          Noah Epstein (nepste01), Katie Kurtz (kkurtz01)
- * Last Modified:    Mar 1st, 2014
+ * Last Modified:    Mar 1st, 2015
  *
  * Acknowledgements: See README.txt
  *
  * Description:      PACKPIX is a module that implements functions which turn
- *                   UArray2bs of component-video pixels into blockwise 
- *                   averages for 2x2 blocks of component video pixels, 
- *                   quantizes the averages to indices, then packs the 
- *                   quantized indicies into 32-bit words which are stored in 
- *                   a Hanson UArray2_T. Reverse to decompress. 
+ *                   UArray2bs of component-video pixels into blockwise
+ *                   averages for 2x2 blocks of component video pixels,
+ *                   quantizes the averages to indices, then packs the
+ *                   quantized indicies into 32-bit words which are stored in
+ *                   a Hanson UArray2_T. Reverse to decompress.
  */
 
 
@@ -71,22 +70,22 @@ static inline void clip_float_cv(struct float_comp_vid *fcv);
 static inline void clip_quant(struct quant_comp_vid *qcv);
 static inline void clip_cv(struct comp_vid *cv);
 
-void apply_block_to_float(int i, int j, UArray2b_T cv_array, void *elem, 
+void apply_block_to_float(int i, int j, UArray2b_T cv_array, void *elem,
                                                            void *arr_closure);
 
-void apply_float_to_quant(int i, int j, UArray2_T fcv_array, void *elem, 
+void apply_float_to_quant(int i, int j, UArray2_T fcv_array, void *elem,
                                                                     void *cl);
 
-void apply_quant_pack(int i, int j, UArray2_T qcv_array, void *elem, 
+void apply_quant_pack(int i, int j, UArray2_T qcv_array, void *elem,
                                                                     void *cl);
 
-void apply_quant_unpack(int i, int j, UArray2_T pack_array, void *elem, 
+void apply_quant_unpack(int i, int j, UArray2_T pack_array, void *elem,
                                                                     void *cl);
 
-void apply_quant_to_float(int i, int j, UArray2_T qcv_array, void *elem, 
+void apply_quant_to_float(int i, int j, UArray2_T qcv_array, void *elem,
                                                                     void *cl);
 
-void apply_float_to_block(int i, int j, UArray2_T fcv_array,  
+void apply_float_to_block(int i, int j, UArray2_T fcv_array,
                                                   void *elem, void *arr2b_cl);
 
 
@@ -94,25 +93,25 @@ void apply_float_to_block(int i, int j, UArray2_T fcv_array,
 /*==========================================================================*/
 
 
-/* Description: Converts a pixelwise component video array into an array of 
- *              32-bit words, using a series of apply functions. 
- *              
+/* Description: Converts a pixelwise component video array into an array of
+ *              32-bit words, using a series of apply functions.
+ *
  * Input:       UArray2b of component video pixels.
  * Output:      UArray2 of 32 bit words, each representing a 2x2 pixel block.
  */
 UArray2_T comp_vid_to_word(UArray2b_T cv_array)
 {
         /*make a target array of blockwise component video structs for map */
-        UArray2_T avg_float_arr = 
-                            UArray2_new(cv_array->width / cv_array->blocksize, 
-                                       cv_array->height / cv_array->blocksize, 
+        UArray2_T avg_float_arr =
+                            UArray2_new(cv_array->width / cv_array->blocksize,
+                                       cv_array->height / cv_array->blocksize,
                                                sizeof(struct float_comp_vid));
-        UArray2_map_row_major(cv_array->blocks, 
+        UArray2_map_row_major(cv_array->blocks,
                       &apply_block_to_float, avg_float_arr);
 
 
         /*make a target array of quant_component video structs for map */
-        UArray2_T quant_arr = 
+        UArray2_T quant_arr =
                             UArray2_new(cv_array->width / cv_array->blocksize,
                                        cv_array->height / cv_array->blocksize,
                                                sizeof(struct quant_comp_vid));
@@ -133,8 +132,8 @@ UArray2_T comp_vid_to_word(UArray2b_T cv_array)
 }
 
 /* Description: Converts a UArray2 of 32 bit words into a Uarray2b of compnent
- *              video pixels. 
- *              
+ *              video pixels.
+ *
  * Input:       UArray2 of 32 bit words, each representing a 2x2 pixel block.
  * Output:      UArray2b of component video pixels.
  */
@@ -143,8 +142,8 @@ UArray2b_T word_to_comp_vid(UArray2_T word_arr)
         /* make a uarray2 to hold all the quantized quant_comp_vid structs
          * after we unpack them
          */
-        UArray2_T quant_arr = 
-                           UArray2_new(word_arr->width, word_arr->height, 
+        UArray2_T quant_arr =
+                           UArray2_new(word_arr->width, word_arr->height,
                                                sizeof(struct quant_comp_vid));
         UArray2_map_row_major(word_arr, &apply_quant_unpack, quant_arr);
 
@@ -159,10 +158,10 @@ UArray2b_T word_to_comp_vid(UArray2_T word_arr)
 
 
         /*turn the float comp vid array into a pixelwise comp_vid array */
-        UArray2b_T cv_array = UArray2b_new(float_arr->width * 2, 
-                                           float_arr->height * 2, 
+        UArray2b_T cv_array = UArray2b_new(float_arr->width * 2,
+                                           float_arr->height * 2,
                                            sizeof(struct comp_vid), BLK_SIZE);
-        UArray2_map_row_major(float_arr, &apply_float_to_block, 
+        UArray2_map_row_major(float_arr, &apply_float_to_block,
                                                            cv_array->blocks);
 
         UArray2_free(&float_arr);
@@ -176,16 +175,16 @@ UArray2b_T word_to_comp_vid(UArray2_T word_arr)
 
 
 /* Description: Apply function that maps through a Uarray2 of UArrays, each
- *              Uarray reprsenting a 2x2 block of CV pixels. Turns all the 
- *              blocks into float_comp_vids, which hold average values about 
- *              the entire block for simplification. 
- *              
- * Input:       Takes i and j indices of the block, pointer to the block 
+ *              Uarray reprsenting a 2x2 block of CV pixels. Turns all the
+ *              blocks into float_comp_vids, which hold average values about
+ *              the entire block for simplification.
+ *
+ * Input:       Takes i and j indices of the block, pointer to the block
  *              itself, new target array passed as closure where we'll place
- *              float_comp_vid structs. 
- * Output:      UArray2 of block average structs as closure. 
+ *              float_comp_vid structs.
+ * Output:      UArray2 of block average structs as closure.
  */
-void apply_block_to_float(int i, int j, UArray2b_T cv_array, void *felem, 
+void apply_block_to_float(int i, int j, UArray2b_T cv_array, void *felem,
                                                             void *arr_closure)
 {
         (void)cv_array;
@@ -210,7 +209,7 @@ void apply_block_to_float(int i, int j, UArray2b_T cv_array, void *felem,
         float y2 = cv2->lum;
         float y3 = cv3->lum;
         float y4 = cv4->lum;
-        
+
         for (int k = 0; k < BLOCK_LEN; k++) {
             cvpixel = UArray_at(block, k);
             total_pb  += cvpixel->pb;
@@ -218,11 +217,11 @@ void apply_block_to_float(int i, int j, UArray2b_T cv_array, void *felem,
         }
 
         //some calculations to average the values of the pixels.
-        //avg brightness, left to right brightness, top to bottom, diagonal. 
+        //avg brightness, left to right brightness, top to bottom, diagonal.
         fcv->a      = (y1 + y2 + y3 + y4) / BLOCK_LEN;
         fcv->b      = (y4 + y3 - y2 - y1) / BLOCK_LEN;
         fcv->c      = (y4 - y3 + y2 - y1) / BLOCK_LEN;
-        fcv->d      = (y4 - y3 - y2 + y1) / BLOCK_LEN; 
+        fcv->d      = (y4 - y3 - y2 + y1) / BLOCK_LEN;
 
         //average color values
         fcv->pb_avg = total_pb / BLOCK_LEN;
@@ -243,15 +242,15 @@ void apply_block_to_float(int i, int j, UArray2b_T cv_array, void *felem,
 
 
 /* Description: Apply function that maps through a Uarray2 of float comp vids,
- *              each of which represents a 2x2 block of pixels. Turns all the 
- *              averages to 2x2 blocks of CV pixels. 
- *              
- * Input:       Takes i and j indices of the block, pointer to the block 
+ *              each of which represents a 2x2 block of pixels. Turns all the
+ *              averages to 2x2 blocks of CV pixels.
+ *
+ * Input:       Takes i and j indices of the block, pointer to the block
  *              itself, new target array passed as closure where we'll place
- *              float_comp_vid structs. 
- * Output:      UArray2b of CV pixels as closure. 
+ *              float_comp_vid structs.
+ * Output:      UArray2b of CV pixels as closure.
  */
-void apply_float_to_block(int i, int j, UArray2_T float_array, void *elem, 
+void apply_float_to_block(int i, int j, UArray2_T float_array, void *elem,
                                                                void *arr2b_cl)
 {
         struct float_comp_vid *fcv = UArray2_at(float_array, i, j);
@@ -290,7 +289,7 @@ void apply_float_to_block(int i, int j, UArray2_T float_array, void *elem,
         pix2->pb = fcv->pb_avg;
         pix2->pr = fcv->pr_avg;
         clip_cv(pix2);
-        
+
         pix3->lum = lum3;
         pix3->pb = fcv->pb_avg;
         pix3->pr = fcv->pr_avg;
@@ -304,20 +303,20 @@ void apply_float_to_block(int i, int j, UArray2_T float_array, void *elem,
 
 
 /* Description: Apply function that maps through a Uarray2 of float comp vids,
- *              each of which represents a 2x2 block of pixels. Quantizes all 
+ *              each of which represents a 2x2 block of pixels. Quantizes all
  *              values using a struct that holds bit fields. Uses arith
- *              functions to perform nonlinear quantization. 
- *              
- * Input:       Takes i and j indices of the fcv, pointer to the fcv itself, 
+ *              functions to perform nonlinear quantization.
+ *
+ * Input:       Takes i and j indices of the fcv, pointer to the fcv itself,
  *              new target array passed as closure where we'll place
- *              quantized_comp_vid structs. 
- * Output:      UArray2 of QCVs as closure. 
+ *              quantized_comp_vid structs.
+ * Output:      UArray2 of QCVs as closure.
  */
-void apply_float_to_quant(int i, int j, UArray2_T float_array, void *elem, 
+void apply_float_to_quant(int i, int j, UArray2_T float_array, void *elem,
                                                                      void *cl)
 {
-        //converts float values to quantized values and stores them in 
-        //quantized structure. 
+        //converts float values to quantized values and stores them in
+        //quantized structure.
 
         struct float_comp_vid *fcv = elem;
         UArray2_T quant_arr = cl;
@@ -337,16 +336,16 @@ void apply_float_to_quant(int i, int j, UArray2_T float_array, void *elem,
 }
 
 
-/* Description: Apply function that maps through a Uarray2 of quantized 
+/* Description: Apply function that maps through a Uarray2 of quantized
  *              component video values and packs each quanitzed element into
- *              a 32 bit word as a client of the bitpack module. 
- *              
- * Input:       Takes i and j indices of the QCV, pointer to the QCV itself, 
+ *              a 32 bit word as a client of the bitpack module.
+ *
+ * Input:       Takes i and j indices of the QCV, pointer to the QCV itself,
  *              new target array passed as closure where we'll place
- *              words. 
- * Output:      UArray2 of 32 bit words as closure. 
+ *              words.
+ * Output:      UArray2 of 32 bit words as closure.
  */
-void apply_quant_pack(int i, int j, UArray2_T quant_arr, void *elem, 
+void apply_quant_pack(int i, int j, UArray2_T quant_arr, void *elem,
                                                                      void *cl)
 {
         struct quant_comp_vid *qcv = elem;
@@ -355,32 +354,32 @@ void apply_quant_pack(int i, int j, UArray2_T quant_arr, void *elem,
         uint32_t *word = UArray2_at(word_array, i, j);
 
         //each element of the quantized struct has a location in the 32b word
-        *word = (uint32_t) Bitpack_newu(* (uint64_t *)word, ABCD_WIDTH, LSB_A, 
+        *word = (uint32_t) Bitpack_newu(* (uint64_t *)word, ABCD_WIDTH, LSB_A,
                                                             (uint64_t)qcv->a);
-        *word = (uint32_t) Bitpack_news(* (uint64_t *)word, ABCD_WIDTH, LSB_B, 
+        *word = (uint32_t) Bitpack_news(* (uint64_t *)word, ABCD_WIDTH, LSB_B,
                                 Bitpack_gets((int64_t)qcv->b, ABCD_WIDTH, 0));
         *word = (uint32_t) Bitpack_news(* (uint64_t *)word, ABCD_WIDTH, LSB_C,
                                 Bitpack_gets((int64_t)qcv->c, ABCD_WIDTH, 0));
-        *word = (uint32_t) Bitpack_news(* (uint64_t *)word, ABCD_WIDTH, LSB_D, 
+        *word = (uint32_t) Bitpack_news(* (uint64_t *)word, ABCD_WIDTH, LSB_D,
                                 Bitpack_gets((int64_t)qcv->d, ABCD_WIDTH, 0));
-        *word = (uint32_t) Bitpack_newu(*(uint64_t *)word, PRPB_WIDTH, LSB_PB, 
+        *word = (uint32_t) Bitpack_newu(*(uint64_t *)word, PRPB_WIDTH, LSB_PB,
                                                           (uint64_t)qcv->qpb);
-        *word = (uint32_t) Bitpack_newu(*(uint64_t *)word, PRPB_WIDTH, LSB_PR, 
+        *word = (uint32_t) Bitpack_newu(*(uint64_t *)word, PRPB_WIDTH, LSB_PR,
                                                           (uint64_t)qcv->qpr);
 
         (void)quant_arr;
 }
 
 
-/* Description: Apply function that maps through a Uarray2 of 32 bit words 
+/* Description: Apply function that maps through a Uarray2 of 32 bit words
  *              and pulls out the quantized component video values.
- *              
+ *
  * Input:       Takes i and j indices of the word, pointer to the word itself,
  *              new target array passed as closure where we'll place
- *              QCVs. 
- * Output:      UArray2 of QCVs as closure. 
+ *              QCVs.
+ * Output:      UArray2 of QCVs as closure.
  */
-void apply_quant_unpack(int i, int j, UArray2_T word_array, void *elem, 
+void apply_quant_unpack(int i, int j, UArray2_T word_array, void *elem,
                                                                      void *cl)
 {
         uint64_t *word = UArray2_at(word_array, i, j);
@@ -388,12 +387,12 @@ void apply_quant_unpack(int i, int j, UArray2_T word_array, void *elem,
         struct quant_comp_vid *qcv = UArray2_at(quant_arr, i , j);
 
         //each element of the quantized struct has a location in the 32b word
-        qcv->a =  (uint32_t) Bitpack_getu(*(uint64_t*)word, ABCD_WIDTH, 
+        qcv->a =  (uint32_t) Bitpack_getu(*(uint64_t*)word, ABCD_WIDTH,
                                                                     LSB_A);
         qcv->b = (int32_t) Bitpack_gets(*(uint64_t *)word, ABCD_WIDTH, LSB_B);
         qcv->c = (int32_t) Bitpack_gets(*(uint64_t *)word, ABCD_WIDTH, LSB_C);
         qcv->d = (int32_t) Bitpack_gets(*(uint64_t *)word, ABCD_WIDTH, LSB_D);
-        qcv->qpb = (uint32_t) Bitpack_getu(*(uint64_t *)word, PRPB_WIDTH, 
+        qcv->qpb = (uint32_t) Bitpack_getu(*(uint64_t *)word, PRPB_WIDTH,
                                                                     LSB_PB);
         qcv->qpr = (uint32_t) Bitpack_getu(*(uint64_t *)word, PRPB_WIDTH,
                                                                     LSB_PR);
@@ -403,15 +402,15 @@ void apply_quant_unpack(int i, int j, UArray2_T word_array, void *elem,
 
 
 /* Description: Apply function that maps through a Uarray2 of quantized comp
- *              video values and unquantizes them, turning them back into 
- *              floats. 
- *              
- * Input:       Takes i and j indices of the QCV, pointer to the QCV itself, 
+ *              video values and unquantizes them, turning them back into
+ *              floats.
+ *
+ * Input:       Takes i and j indices of the QCV, pointer to the QCV itself,
  *              new target array passed as closure where we'll place
- *              FCV. 
- * Output:      UArray2 of FCVs as closure. 
+ *              FCV.
+ * Output:      UArray2 of FCVs as closure.
  */
-void apply_quant_to_float(int i, int j, UArray2_T quant_arr, void *elem, 
+void apply_quant_to_float(int i, int j, UArray2_T quant_arr, void *elem,
                                                                      void *cl)
 {
         //converts quant_comp_vid structs to float_comp_vid structs and stores
@@ -437,7 +436,7 @@ void apply_quant_to_float(int i, int j, UArray2_T quant_arr, void *elem,
 
 /* ============================== CLIP FUNCTIONS ======================== */
 
-/*function for clipping component values in a pixel to appropriate high and 
+/*function for clipping component values in a pixel to appropriate high and
  *low values
  */
 static inline void clip_cv(struct comp_vid *cv)
@@ -474,7 +473,7 @@ static inline void clip_float_cv(struct float_comp_vid *fcv)
     } else if (fcv->b < CV_LOW_BOUND) {
         fcv->b = CV_LOW_BOUND;
     }
-    
+
     if (fcv->c > CV_HIGH_BOUND) {
         fcv->c = CV_HIGH_BOUND;
 
@@ -511,42 +510,38 @@ static inline void clip_float_cv(struct float_comp_vid *fcv)
 static inline void clip_quant(struct quant_comp_vid *qcv)
 {
         if (qcv->a > QCVA_HIGH) {
-                qcv->a = QCVA_HIGH; 
+                qcv->a = QCVA_HIGH;
         } else if (qcv->a < QCVA_LOW) {
                 qcv->a = QCVA_LOW;
         }
 
         if (qcv->b > QCVB_HIGH) {
-                qcv->b = QCVB_HIGH; 
+                qcv->b = QCVB_HIGH;
         } else if (qcv->b < QCVB_LOW) {
                 qcv->b = QCVB_LOW;
         }
 
         if (qcv->c > QCVC_HIGH) {
-                qcv->c = QCVC_HIGH; 
+                qcv->c = QCVC_HIGH;
         } else if (qcv->c < QCVC_LOW) {
                 qcv->c = QCVC_LOW;
-        }   
+        }
 
         if (qcv->d > QCVD_HIGH) {
-                qcv->d = QCVD_HIGH; 
+                qcv->d = QCVD_HIGH;
         } else if (qcv->d < QCVD_LOW) {
                 qcv->d = QCVD_LOW;
         }
 
         if (qcv->qpb > QCVQPB_HIGH) {
-                qcv->qpb = QCVQPB_HIGH; 
+                qcv->qpb = QCVQPB_HIGH;
         } else if (qcv->qpb < QCVQPB_LOW) {
                 qcv->qpb = QCVQPB_LOW;
         }
-        
+
         if (qcv->qpr > QCVQPR_HIGH) {
-                qcv->qpr = QCVQPR_HIGH; 
+                qcv->qpr = QCVQPR_HIGH;
         } else if (qcv->qpr < QCVQPR_LOW) {
                 qcv->qpr = QCVQPR_LOW;
         }
 }
-
-
-
-

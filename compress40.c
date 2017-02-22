@@ -1,12 +1,11 @@
 /* Filename:         compress40.c
- * Authors:          Noah Epstein (nepste01), Katie Kurtz (kkurtz01)
- * Last Modified:    Mar 1st, 2014
+ * Last Modified:    Mar 1st, 2015
  *
  * Acknowledgements: See README.txt
  *
  * Description:      Module for 40image compression program that handles file
- *                   I/O and calls the "tiers" of the image compression and 
- *                   decompression in sequence. 
+ *                   I/O and calls the "tiers" of the image compression and
+ *                   decompression in sequence.
  */
 
 
@@ -36,16 +35,16 @@ void test40(FILE *input);
 
 /* Description: ---TEST FUNCTION FOR 40IMAGE---
  *              Takes in a PPM file, stores it as an image, and compresses it:
- *              turning RGB pixels to component video pixels, then turning 
- *              component video pixels to bitpacked words. 
+ *              turning RGB pixels to component video pixels, then turning
+ *              component video pixels to bitpacked words.
  *              Decompresses bitpacked words via the reverse of the above.
 
  * Input:       PPM file pointer. CRE to pass NULL input.
- * Output:      Nothing. Calls functions to print a pixmap to stdout. 
+ * Output:      Nothing. Calls functions to print a pixmap to stdout.
  */
 void test40(FILE *input)
 {
-        //compress 
+        //compress
         Pnm_ppm img = make_ppm(input);
         assert(img != NULL);
         img = trim(img);
@@ -64,19 +63,19 @@ void test40(FILE *input)
         Pnm_ppmfree(&pixmap);
 
         (void)comp_vid;
-        (void)pixmap;   
+        (void)pixmap;
 }
 
 
 /* Description: Takes in a PPM file, stores it as an image, and compresses it:
- *              turning RGB pixels to component video pixels, then turning 
- *              component video pixels to bitpacked words. Prints the 
- *              bitpacked words to stdout as a binary file. 
- *              
+ *              turning RGB pixels to component video pixels, then turning
+ *              component video pixels to bitpacked words. Prints the
+ *              bitpacked words to stdout as a binary file.
+ *
  * Input:       PPM file pointer. CRE to pass NULL input.
- * Output:      Nothing. Calls functions to print a binary image to stdout. 
+ * Output:      Nothing. Calls functions to print a binary image to stdout.
  */
-void compress40  (FILE *input) 
+void compress40  (FILE *input)
 {
         Pnm_ppm img = make_ppm(input);
         assert(img != NULL);
@@ -92,12 +91,12 @@ void compress40  (FILE *input)
 
 
 /* Description: Takes in a binary compressed file, stores, and compresses it.
- *              Allocates memory to store the binary file, turns bitpacked 
- *              words into component video pixels, turns component video 
- *              pixels into RGB pixels, then prints as a PPM file. 
- *              
+ *              Allocates memory to store the binary file, turns bitpacked
+ *              words into component video pixels, turns component video
+ *              pixels into RGB pixels, then prints as a PPM file.
+ *
  * Input:       Binary compressed image file pointer. CRE to pass NULL input.
- * Output:      Nothing. Calls functions to write a PPM to stdout. 
+ * Output:      Nothing. Calls functions to write a PPM to stdout.
  */
 void decompress40(FILE *input)
 {
@@ -105,7 +104,7 @@ void decompress40(FILE *input)
         methods = uarray2_methods_blocked;
         UArray2_T bimg = make_binary_img(input);
         UArray2b_T cvarray = word_to_comp_vid(bimg);
-        Pnm_ppm pixmap =  comp_vid_to_rgb(cvarray); 
+        Pnm_ppm pixmap =  comp_vid_to_rgb(cvarray);
         Pnm_ppmwrite(stdout, pixmap);
 
         UArray2_free(&bimg);
@@ -115,9 +114,9 @@ void decompress40(FILE *input)
 
 
 /* Description: Takes in a ppm file pointer and reads to create a PPM.
- *              
- * Input:       PPM file pointer. CRE for null input. 
- * Output:      PPM_PPM image. 
+ *
+ * Input:       PPM file pointer. CRE for null input.
+ * Output:      PPM_PPM image.
  */
 Pnm_ppm make_ppm(FILE *input)
 {
@@ -127,37 +126,37 @@ Pnm_ppm make_ppm(FILE *input)
         return pix;
 }
 
-/* Description: Takes in a binary compressed file, reads its header, and 
- *              stores the image data in a 2D array of 32-bit words. 
- *              
+/* Description: Takes in a binary compressed file, reads its header, and
+ *              stores the image data in a 2D array of 32-bit words.
+ *
  * Input:       Binary compressed image file pointer. CRE to pass NULL input.
- * Output:      UArray2_t that holds bitpacked iamge data. 
+ * Output:      UArray2_t that holds bitpacked iamge data.
  */
 UArray2_T make_binary_img(FILE *input)
 {
         assert(input != NULL);
 
         unsigned height, width;
-        int read = fscanf(input, "COMP40 Compressed image format 2\n%u %u", 
+        int read = fscanf(input, "COMP40 Compressed image format 2\n%u %u",
                                                        &width, &height);
         assert(read == 2);
         int c = getc(input);
         assert (c == '\n');
         uint64_t word;
-        
+
         UArray2_T binary_img_array = UArray2_new(width, height, W_SIZE);
         c =  getc(input);
-   
+
         for (unsigned int i = 0; i < height; i ++){
                 for (unsigned int j = 0; j < width; j++){
                         //loops through word, putting bytes in big-endian
                         for (unsigned k = 0; k < 4; k++) {
-                        
-                                word  = Bitpack_newu(word, W_SIZE, 
+
+                                word  = Bitpack_newu(word, W_SIZE,
                                                      k * W_SIZE, (unsigned)c);
                                 c =  getc(input);
                         }
-                        
+
                         uint32_t *elem = UArray2_at(binary_img_array, j, i);
                         *elem = word;
                 }
@@ -166,11 +165,11 @@ UArray2_T make_binary_img(FILE *input)
 }
 
 
-/* Description: Trims a pnm_ppm so that it has even width and height values. 
+/* Description: Trims a pnm_ppm so that it has even width and height values.
  *              Does nothing for even widths and heights. Creates a new image
- *              for odd widths and heights and puts the old image less the 
- *              odd row or column into the new image. 
- *              
+ *              for odd widths and heights and puts the old image less the
+ *              odd row or column into the new image.
+ *
  * Input:       PPM image. CRE to pass NULL input.
  * Output:      Pmn_ppm - original for even width and height, new Pnm_ppm for
  *              odd width or height.
@@ -180,25 +179,25 @@ Pnm_ppm trim(Pnm_ppm img)
         assert(img != NULL);
         unsigned int widthnew = img->width;
         unsigned int heightnew = img->height;
-        
+
         if(widthnew % 2 != 0)
                 widthnew --;
         if (heightnew % 2 != 0)
                 heightnew --;
-        
+
         if (widthnew != img->width || heightnew != img->height) {
-                
-                UArray2b_T newarray = UArray2b_new(widthnew, heightnew, 
+
+                UArray2b_T newarray = UArray2b_new(widthnew, heightnew,
                                                         sizeof(UArray2_T), 2);
                 for (unsigned int i = 0; i < heightnew; i++){
-                       
+
                         for (unsigned int j = 0; j < widthnew; j++){
-                                
-                                struct Pnm_rgb *origelem 
+
+                                struct Pnm_rgb *origelem
                                            = UArray2b_at( img->pixels, j, i );
-                                struct Pnm_rgb *newelem 
+                                struct Pnm_rgb *newelem
                                            = UArray2b_at( newarray, j, i );
-                               
+
                                 newelem->red = origelem->red;
                                 newelem->green = origelem->green;
                                 newelem->blue = origelem->blue;
@@ -214,14 +213,14 @@ Pnm_ppm trim(Pnm_ppm img)
 
 
 /* Description: Prints a binary image that consists of 32-bit bitpacked image
- *              data. Uses below header format. 
- *              
+ *              data. Uses below header format.
+ *
  * Input:       UArray2 of bitpacked image data.
- * Output:      None. Prints to stdout. 
+ * Output:      None. Prints to stdout.
  */
 void print_compressed(UArray2_T comp_image)
 {
-        fprintf(stdout, "COMP40 Compressed image format 2\n%u %u\n", 
+        fprintf(stdout, "COMP40 Compressed image format 2\n%u %u\n",
                                comp_image->width, comp_image->height);
 
 
@@ -230,7 +229,7 @@ void print_compressed(UArray2_T comp_image)
                 for(int j = 0; j < comp_image->width; j++){
                         word = UArray2_at(comp_image, j, i);
                         for (unsigned k = 0; k < 4; k++) {
-                                putchar(Bitpack_getu(*(uint64_t *)word, 
+                                putchar(Bitpack_getu(*(uint64_t *)word,
                                                          W_SIZE, k * W_SIZE));
                         }
                 }

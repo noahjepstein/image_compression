@@ -1,5 +1,4 @@
 #include <string.h>
-
 #include <a2blocked.h>
 #include "uarray2b.h"
 
@@ -9,8 +8,8 @@ typedef A2Methods_UArray2 A2;   // private abbreviation
 
 static A2 new(int width, int height, int size)
 {
-    /* 
-     * Changed default new blocksize to 2 so we can use the UArray2b 
+    /*
+     * Changed default new blocksize to 2 so we can use the UArray2b
      * from the pixmap and pull out a 2x2 block of pixels.
      */
     const int BLOCKSIZE_FOR_COMPRESSION = 2;

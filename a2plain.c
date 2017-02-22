@@ -1,15 +1,3 @@
-/* filename: a2plain.c
- * 
- * by: Emma Arnesty-Good
- *     Noah Epstein
- *
- * date: February 13th 2014
- *
- * assignment: Comp 40 Homework 1: Interfaces, Implementations, and Images
- *
- * summary: 
- *
-*/
 #include <stdlib.h>
 #include <string.h>
 #include <a2plain.h>
@@ -17,7 +5,7 @@
 
 
 /* private abbreviation for A2Methods */
-typedef A2Methods_UArray2 A2;   
+typedef A2Methods_UArray2 A2;
 
 static A2Methods_UArray2 new(int width, int height, int size)
 {
@@ -129,4 +117,3 @@ static struct A2Methods_T uarray2_methods_plain_struct = {
 };
 
 A2Methods_T uarray2_methods_plain = &uarray2_methods_plain_struct;
-

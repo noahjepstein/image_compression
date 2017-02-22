@@ -1,10 +1,9 @@
 /* Filename:         packpix.h
- * Authors:          Noah Epstein (nepste01), Katie Kurtz (kkurtz01)
  * Last Modified:    Mar 1st, 2014
  *
  * Acknowledgements: See README.txt
  *
- * Description:      Header file for PACKPIX module. 
+ * Description:      Header file for PACKPIX module.
  */
 
 #include <stdlib.h>

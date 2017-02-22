@@ -34,13 +34,13 @@ T UArray2b_new(int width, int height, int size, int blocksize) {
   array->blocks = UArray2_new((width  + blocksize - 1) / blocksize,
                              (height + blocksize - 1) / blocksize,
                              sizeof(UArray_T));
-  int xblocks = UArray2_width (array->blocks); 
+  int xblocks = UArray2_width (array->blocks);
   int yblocks = UArray2_height(array->blocks);
   for (int i = 0; i < xblocks; i++) {
     for (int j = 0; j < yblocks; j++) {
       UArray_T *block = UArray2_at(array->blocks, i, j);
       *block = UArray_new(blocksize * blocksize, size);
-      
+
 #line 148 "www/solutions/uarray2b.nw"
 if (0) {
   fprintf(stderr, "Allocated %p; put %p at %p\n",
@@ -90,7 +90,7 @@ void *UArray2b_at(T array2b, int i, int j) {
   return UArray_at(*blockp, (i % b) * b + j % b);
 }
 #line 199 "www/solutions/uarray2b.nw"
-void UArray2b_map(T array2b, 
+void UArray2b_map(T array2b,
     void apply(int i, int j, T array2b, void *elem, void *cl), void *cl) {
   assert(array2b);
   int h = array2b->height;
@@ -105,7 +105,7 @@ void UArray2b_map(T array2b,
       UArray_T *blockp = UArray2_at(blocks, bx, by);
       UArray_T block = *blockp;
       int len = UArray_length(block);
-      int i0 = b * bx; // (i0,j0) correspond to upper left 
+      int i0 = b * bx; // (i0,j0) correspond to upper left
       int j0 = b * by; // corner of block (bx, by)
       for (int cell = 0; cell < len; cell++) {
         int i = i0 + cell / b;

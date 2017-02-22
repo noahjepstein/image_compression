@@ -1,6 +1,5 @@
 /* Filename:         types.h
- * Authors:          Noah Epstein (nepste01), Katie Kurtz (kkurtz01)
- * Last Modified:    Mar 1st, 2014
+ * Last Modified:    Mar 1st, 2015
  *
  * Acknowledgements: See README.txt
  *
@@ -12,7 +11,7 @@
 
 #include "uarray.h"
 
-struct UArray2b_T { 
+struct UArray2b_T {
         int width, height;
         unsigned blocksize;
         unsigned size;
@@ -29,7 +28,7 @@ struct comp_vid
 
 
 /* float comp vid and quant_comp_vid are structs that contain data about a
- * 2x2 block of pixels. 
+ * 2x2 block of pixels.
  */
 struct float_comp_vid
 {
@@ -44,7 +43,7 @@ struct float_comp_vid
 /* defines quantized bit fields for component video block */
 struct quant_comp_vid
 {
-       
+
         unsigned a   : 6;
         unsigned qpb : 4;
         unsigned qpr : 4;

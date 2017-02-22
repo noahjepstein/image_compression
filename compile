@@ -5,7 +5,7 @@ set -e    # halt on first error
 link=all  # link all binaries by default
 linked=no # track whether we linked
 
-case $1 in  
+case $1 in
   -nolink) link=none ; shift ;;  # don't link
   -link)   link="$2" ; shift ; shift ;;  # link only one binary
 esac
@@ -32,7 +32,7 @@ case $# in
 esac
 
 # compile each argument to a .o file
-for cfile 
+for cfile
 do
   $CC $FLAGS $CFLAGS -c $cfile
 done
@@ -45,13 +45,13 @@ case $link in
   all|40image-6) $CC $FLAGS -o 40image-6 40image.o a2plain.o \
                   uarray2b.o uarray2.o a2blocked.o compress40.o \
                   rgbconvert.o packpix.o  bitpack.o               \
-                  $LIBS $CIILIBS  $LFLAGS 
+                  $LIBS $CIILIBS  $LFLAGS
                   linked=yes ;;
-esac 
+esac
 
 # error if asked to link something we didn't recognize
 if [ $linked = no ]; then
-  case $link in  # if the -link option makes no sense, complain 
+  case $link in  # if the -link option makes no sense, complain
     none) ;; # OK, do nothing
     *) echo "`basename $0`: don't know how to link $link" 1>&2 ; exit 1 ;;
   esac
